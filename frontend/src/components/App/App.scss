@@ -1,0 +1,38 @@
+html,
+body {
+  max-width: 100vw;
+  overflow-x: hidden;
+  background: #f5f6f8;
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+svg {
+  transition: 0.2s;
+}
+
+.notistack-MuiContent {
+  display: flex !important;
+  justify-content: space-between !important;
+  div:nth-child(2) {
+    margin-left: 0 !important;
+    margin-right: auto !important;
+    padding-left: 0 !important;
+    padding-right: 16px;
+  }
+}
+
+//mui grid
+
+.MuiToolbar-root {
+  flex-direction: row-reverse !important;
+}
+
+.MuiTablePagination-actions {
+  display: flex;
+  flex-direction: row-reverse !important;
+}

@@ -1,0 +1,34 @@
+version: "3"
+services:
+  # Create frontend container
+  frontend: # Name of our service
+    build: ./frontend/dockerfile.production # path to dockerfile
+    ports: # Port binding to host from docker container
+      - "8000:8000" # Bind port 3000 of host to 3000 of container
+    container_name: pinger-frontend-prod
+    restart: always # What to do if container crashes
+    links:
+      - backend
+  # Create backend container
+  backend:
+    # Create backend container
+    build: ./backend/dockerfile.production
+    ports:
+      - "3000:3000"
+    container_name: pinger-backend-prod
+    privileged: true
+    restart: always
+    links:
+      - db
+  # Create database container
+  db:
+    image: mongo:4.4.4
+    container_name: pinger-db-prod
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    ports:
+      - 27017:27017
+    volumes:
+      - ./mongo-data-prod:/data/db
