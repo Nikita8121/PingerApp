@@ -15,6 +15,4 @@ export class AvailableAddressForDeviceDto {
   masad: number;
   @IsEnum(DeviceType)
   deviceType: DeviceType;
-  @IsNumber()
-  port: number;
 }

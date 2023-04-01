@@ -15,7 +15,7 @@ async function bootstrap() {
     new ValidationErrorFilter(),
   );
   app.enableCors({
-    origin: ['http://127.0.0.1:5173'],
+    origin: ['http://127.0.0.1:5173', 'http://localhost:8000'],
     credentials: true,
   });
   const config = new DocumentBuilder().build();

@@ -15,7 +15,6 @@ export interface IFindAvailableAddressData {
   hamal: number;
   area: number;
   deviceType: DeviceTypeEnum;
-  port: number;
   masad?: number;
 }
 

@@ -47,11 +47,6 @@ const headCells: readonly HeadCell[] = [
     label: 'אתר',
   },
   {
-    id: 'ip',
-    numeric: true,
-    label: 'IP',
-  },
-  {
     id: 'deviceType',
     numeric: true,
     label: 'סוג אמצעי',
@@ -176,7 +171,6 @@ const Row = ({
         </TableCell>
         <TableCell align='right'>{hamalsConstant[device.hamal].name}</TableCell>
         <TableCell align='right'>{device.area}</TableCell>
-        <TableCell align='right'>{device.ip}</TableCell>
         <TableCell align='right'>{device.deviceType}</TableCell>
         <TableCell align='right'>{device.isAlive ? 'מבצעי' : 'רזרבה'}</TableCell>
         <TableCell>

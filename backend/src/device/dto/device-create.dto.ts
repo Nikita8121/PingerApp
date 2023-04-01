@@ -20,9 +20,6 @@ export class DeviceCreateDto {
   masad: number;
 
   @IsNumber()
-  port: number;
-
-  @IsNumber()
   hamal: number;
 
   @IsNumber()

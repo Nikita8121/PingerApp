@@ -52,11 +52,6 @@ export class DeviceModel extends TimeStamps {
   @prop({ required: true })
   ip: string;
 
-
-  @prop({ required: true })
-  port: number;
-
-
   @prop({ type: String, enum: DeviceType })
   deviceType: DeviceType;
 
