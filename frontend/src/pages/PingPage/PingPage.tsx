@@ -32,7 +32,10 @@ const PingPage = () => {
 
   const isPingingDone = ({ numberOfFirstArea, numberOfLastArea }: IPingDevicesData) => {
     const end =
-      (numberOfLastArea != numberOfFirstArea && numberOfLastArea) || numberOfFirstArea + 1;
+      (typeof numberOfLastArea == 'number' &&
+        numberOfLastArea != numberOfFirstArea &&
+        numberOfLastArea + 1) ||
+      numberOfFirstArea + 1;
     const start = numberOfFirstArea;
     const numberOfAddresses = (end - start) * numberOfAddressesOnArea;
     return pingMessages.length === numberOfAddresses;
@@ -58,7 +61,7 @@ const PingPage = () => {
     [pingMessages, isPingPending, isReady],
   );
 
-  const isShowTable = useMemo(() => pingMessages.length, [pingMessages]);
+  const isShowTable = useMemo(() => pingMessages.length > 0, [pingMessages]);
 
   const isShowLoader = useMemo(() => isPingPending || !isReady, [isPingPending, isReady]);
 

@@ -39,7 +39,6 @@ const devicesTypes =
 
 export interface DeviceModel extends Base {}
 export class DeviceModel extends TimeStamps {
-
   @prop({ type: Number, enum: LocationEnum })
   location: LocationEnum;
 

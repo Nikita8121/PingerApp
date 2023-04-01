@@ -17,7 +17,6 @@ export const Devices = () => {
 
   const { filteredDevices, setFilter } = useFilterDevices(devices ?? []);
 
-  /*  const [filters, setFilters] = useState<IDeviceFilterProperties>({}); */
   const { refetch: fetchDevicesExcel } = useDeviceExcelQuery(onCreateExcelSuccess);
 
   const onDeleteSuccess = () => {
@@ -25,30 +24,6 @@ export const Devices = () => {
   };
 
   const { mutate } = useDeleteDevices(onDeleteSuccess);
-
-  /* const filteredData = useMemo(() => {
-    return devices?.filter((device) => {
-      const isFilterPropertyEqualToDevice = Object.keys(filters).every((key) => {
-        if (!filters[key as keyof IDeviceFilterProperties]) return true;
-
-        return (
-          filters[key as keyof IDeviceFilterProperties] ==
-          device[key as keyof IDeviceFilterProperties]
-        );
-      });
-
-      if (isFilterPropertyEqualToDevice) {
-        return device;
-      }
-    });
-  }, [filters, devices]); */
-
-  /*   const setFilter = (
-    key: keyof IDeviceFilterProperties,
-    value: string | number | boolean,
-  ): void => {
-    setFilters({ ...filters, [key]: value });
-  }; */
 
   const onCreateExcel = () => {
     setIsLoadingExcel(true);

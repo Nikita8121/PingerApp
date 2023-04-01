@@ -21,7 +21,6 @@ export class AddressService {
 
     let areaNum = numberOfFirstArea;
     const numberToLoop = numberOfLastArea || numberOfFirstArea;
-
     do {
       const ipWithoutDeviceNum = `${ipWithoutAreaAndLastNumber}${areaNum}.`;
 

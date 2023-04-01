@@ -68,12 +68,12 @@ export class DeviceService {
       location: deviceCreateDto.location,
       hamal: deviceCreateDto.hamal,
       area: deviceCreateDto.area,
-      deviceType: deviceCreateDto.deviceType,
       ip: deviceCreateDto.ip,
+      deviceType: deviceCreateDto.deviceType,
       hamalNum: deviceCreateDto.hamal,
       device: await createDevice(deviceCreateDto),
       isAlive: false,
-    } as Omit<DeviceModel, 'id' | '_id'>);
+    } as Omit<DeviceModel, '_id' | 'id'>);
   }
 
   /**
