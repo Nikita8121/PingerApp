@@ -5,8 +5,8 @@ import {
   IsNumber,
   IsOptional,
 } from 'class-validator';
-import { DeviceType } from '../enums/device-type.enum';
-import { LocationEnum } from '../enums/location.enum';
+import { DeviceType } from '../types/enums/device-type.enum';
+import { LocationEnum } from '../types/enums/location.enum';
 
 export class DeviceCreateDto {
   @IsString()

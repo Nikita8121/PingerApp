@@ -1,5 +1,5 @@
 import { IsNumber, IsString, IsEnum, IsOptional } from 'class-validator';
-import { LocationEnum } from 'src/device/enums/location.enum';
+import { LocationEnum } from 'src/device/types/enums/location.enum';
 
 export class AddressesPingDto {
   @IsEnum(LocationEnum)

@@ -1,4 +1,4 @@
-import { DeviceType } from '../enums/device-type.enum';
+import { DeviceType } from '../types/enums/device-type.enum';
 import { DeviceCreateDto } from '../dto/device-create.dto';
 import {
   CameraMc,

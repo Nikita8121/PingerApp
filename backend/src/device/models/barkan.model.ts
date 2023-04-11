@@ -1,6 +1,7 @@
 import { prop } from '@typegoose/typegoose';
+import { IBarkan } from '../types/interfaces/devices';
 
-export class BarkanModel {
+export class BarkanModel implements IBarkan {
   @prop({ required: true })
   name: string;
   @prop()

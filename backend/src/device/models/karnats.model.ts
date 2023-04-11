@@ -1,6 +1,7 @@
 import { Prop } from '@typegoose/typegoose';
+import { IKarnatz } from '../types/interfaces/devices';
 
-export class KarnatzModel {
+export class KarnatzModel implements IKarnatz {
   @Prop()
   name: string;
   @Prop()

@@ -47,7 +47,7 @@ export const DevicesFilter = ({ setFilter }: DevicesFilterProps) => {
         >
           <Grid item xs={12} md={6}>
             <FormControl fullWidth>
-              <InputLabel id='aliveStatus'>חיי סטטוס</InputLabel>
+              <InputLabel id='aliveStatus'>סטטוס</InputLabel>
               <Select
                 onChange={({ target }) =>
                   setFilter(
@@ -65,8 +65,8 @@ export const DevicesFilter = ({ setFilter }: DevicesFilterProps) => {
                 label='סטטוס'
               >
                 <MenuItem value={''}>אף אחד</MenuItem>
-                <MenuItem value={'disconnected'}>מנותק</MenuItem>
-                <MenuItem value={'alive'}>חיי</MenuItem>
+                <MenuItem value={'disconnected'}>רזרבה</MenuItem>
+                <MenuItem value={'alive'}>מבצעי</MenuItem>
               </Select>
             </FormControl>
           </Grid>

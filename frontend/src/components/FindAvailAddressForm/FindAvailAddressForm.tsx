@@ -22,7 +22,11 @@ export const FindAvailAddressForm = ({ submitFunc }: FindAvailAddressFormProps) 
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<IFindAvailableAddressData>();
+  } = useForm<IFindAvailableAddressData>({
+    resetOptions: {
+      keepValues: true,
+    },
+  });
 
   return (
     <form onSubmit={handleSubmit(submitFunc)}>

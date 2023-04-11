@@ -19,7 +19,7 @@ import {
 } from './helpers/find-available-address-for-device';
 import { AvailableAddressDto } from './dto/device-available-address-results.dto';
 import { Interval } from '@nestjs/schedule';
-import { DeviceType } from './enums/device-type.enum';
+import { DeviceType } from './types/enums/device-type.enum';
 import {
   isAvivAlive,
   isBarkanAlive,

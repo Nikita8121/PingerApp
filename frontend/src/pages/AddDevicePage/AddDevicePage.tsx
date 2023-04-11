@@ -57,12 +57,14 @@ export const AddDevicePage = () => {
     }
   };
 
-  if (isLoadingAddresses || isAddingDevice) {
+  /* if (isLoadingAddresses || isAddingDevice) {
     return <Loader size={100} />;
-  }
+  } */
 
   return (
     <>
+      <Loader fullPage size={100} />
+      {(isLoadingAddresses || isAddingDevice) && <Loader size={100} />}
       {isFindAddressSuccess && (
         <AddDeviceModal onCancel={resetFindAddress} onSubmit={onSubmit} data={data} />
       )}

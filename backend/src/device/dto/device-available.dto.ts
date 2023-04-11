@@ -1,6 +1,6 @@
 import { IsNumber, IsEnum, IsOptional } from 'class-validator';
-import { DeviceType } from '../enums/device-type.enum';
-import { LocationEnum } from '../enums/location.enum';
+import { DeviceType } from '../types/enums/device-type.enum';
+import { LocationEnum } from '../types/enums/location.enum';
 import { Port } from '../helpers/device.constants';
 
 export class AvailableAddressForDeviceDto {

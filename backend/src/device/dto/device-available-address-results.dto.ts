@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { DeviceType } from '../enums/device-type.enum';
-import { LocationEnum } from '../enums/location.enum';
+import { DeviceType } from '../types/enums/device-type.enum';
+import { LocationEnum } from '../types/enums/location.enum';
 
 class addressesDto {
   [key: string]: string;

@@ -9,6 +9,7 @@ WORKDIR /usr/src/app/frontend
 # Copy package json and install dependencies
 COPY package*.json ./
 # Copy our app
+RUN npm cache clean –force
 RUN npm install
 COPY . .
 RUN npm run build

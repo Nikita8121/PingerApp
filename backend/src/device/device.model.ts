@@ -1,7 +1,7 @@
 import { mongoose, prop } from '@typegoose/typegoose';
 import { TimeStamps, Base } from '@typegoose/typegoose/lib/defaultClasses';
 
-import { DeviceType } from './enums/device-type.enum';
+import { DeviceType } from './types/enums/device-type.enum';
 import {
   AvivModel,
   BarkanModel,
@@ -12,7 +12,7 @@ import {
   SecControllerModel,
   SpiderModel,
 } from './models';
-import { LocationEnum } from './enums/location.enum';
+import { LocationEnum } from './types/enums/location.enum';
 
 // #region shit code, need changes
 type devicesTypes =
