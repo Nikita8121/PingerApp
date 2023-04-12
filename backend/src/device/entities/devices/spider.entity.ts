@@ -1,4 +1,4 @@
-import { ISpider } from '../types/interfaces/devices';
+import { ISpider } from '../../types/interfaces/devices';
 
 export class SpiderEntity implements ISpider {
   name: string;

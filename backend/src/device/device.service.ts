@@ -4,7 +4,6 @@ import { DeviceModel } from './device.model';
 import { DeviceCreateDto } from './dto/device-create.dto';
 import { ModelType } from '@typegoose/typegoose/lib/types';
 import { PingerHelperService } from 'src/utils/pingerHelper/pingerHelper.service';
-import { IAtar, IHamal, enrichedDeviceType } from './device.types';
 import { AvailableAddressForDeviceDto } from './dto/device-available.dto';
 
 import { DeviceDeleteDto } from './dto/device.delete.dto';
@@ -29,7 +28,6 @@ import {
   isSecCameraAlive,
   isSpiderAlive,
 } from './helpers/check-address-availability-for-device';
-import { createDevice } from './helpers/create-new-device';
 import { groupBy } from '../helpers/groupByArray.helper';
 import {
   AvivModel,
@@ -43,6 +41,24 @@ import {
 } from './models';
 import { DevicesGetDto } from './dto/devices-get.dto';
 import { hamals } from './helpers/device.constants';
+import { DeviceFactory } from './factories/device.factory';
+import { IHamal } from './types/interfaces/hamal.interface';
+import { enrichedDeviceType } from './types/index.types';
+import {
+  IAviv,
+  IBarkan,
+  IKarnatz,
+  INetz,
+  IRadar,
+  ISecCamera,
+  ISecController,
+  ISpider,
+} from './types/interfaces/devices';
+import { KarnatzComponentsFactory } from './factories/components/karnatz-components.factory';
+import { BarkanComponentsFactory } from './factories/components/barkan-components.factory';
+import { NetzComponentsFactory } from './factories/components/netz-components.factory';
+import { AvivComponentsFactory } from './factories/components/aviv-components.factory';
+import { SpiderComponentsFactory } from './factories/components/spider-components.factory';
 
 const amountOfDevices: number = 9;
 
@@ -64,16 +80,11 @@ export class DeviceService {
   async addDevice(deviceCreateDto: DeviceCreateDto): Promise<DeviceModel> {
     if (await this.deviceModel.findOne({ ip: deviceCreateDto.ip }))
       throw new BadRequestException('cords taken');
-    return this.deviceModel.create({
-      location: deviceCreateDto.location,
-      hamal: deviceCreateDto.hamal,
-      area: deviceCreateDto.area,
-      ip: deviceCreateDto.ip,
-      deviceType: deviceCreateDto.deviceType,
-      hamalNum: deviceCreateDto.hamal,
-      device: await createDevice(deviceCreateDto),
-      isAlive: false,
-    } as Omit<DeviceModel, '_id' | 'id'>);
+
+    const deviceFactory = new DeviceFactory(deviceCreateDto);
+    const deviceEntity = deviceFactory.getDeviceEntity();
+
+    return this.deviceModel.create(deviceEntity);
   }
 
   /**
@@ -259,167 +270,37 @@ export class DeviceService {
         case DeviceType.Karnatz:
           return {
             ...device,
-            components: {
-              Computer: {
-                name: 'מחשב1',
-                values: {
-                  ip: (device.device as KarnatzModel).ComputerIp,
-                  port: (device.device as KarnatzModel).Port,
-                  MC: null,
-                  portMC: null,
-                },
-              },
-              Computer2: {
-                name: 'מחשב2',
-                values: {
-                  ip: (device.device as KarnatzModel).ComputerIp2,
-                  port: null,
-                  MC: null,
-                  portMC: null,
-                },
-              },
-              Compressor1: {
-                name: 'דוחס1',
-                values: {
-                  ip: (device.device as KarnatzModel).CompressorIp,
-                  port: null,
-                  MC: (device.device as KarnatzModel).CompressorMc,
-                  portMC: (device.device as KarnatzModel).McPort,
-                },
-              },
-              Compressor2: {
-                name: 'דוחס2',
-                values: {
-                  ip: (device.device as KarnatzModel).CompressorIp2,
-                  port: null,
-                  MC: (device.device as KarnatzModel).CompressorMc2,
-                  portMC: null,
-                },
-              },
-            },
+            components: KarnatzComponentsFactory.getKarnatzComponents(
+              device.device as IKarnatz,
+            ),
           };
         case DeviceType.Barkan:
           return {
             ...device,
-            components: {
-              Computer: {
-                name: 'מחשב1',
-                values: {
-                  ip: (device.device as BarkanModel).ComputerIp,
-                  port: (device.device as BarkanModel).Port,
-                  MC: null,
-                  portMC: null,
-                },
-              },
-            },
+            components: BarkanComponentsFactory.getBarkanComponents(
+              device.device as IBarkan,
+            ),
           };
         case DeviceType.Netz:
           return {
             ...device,
-            components: {
-              IUIp: {
-                name: 'IUIp',
-                values: {
-                  ip: (device.device as NetzModel).IUIp,
-                  port: (device.device as NetzModel).Port,
-                  MC: null,
-                  portMC: null,
-                },
-              },
-              KVM: {
-                name: 'KVM',
-                values: {
-                  ip: (device.device as NetzModel).KVM,
-                  port: null,
-                  MC: null,
-                  portMC: null,
-                },
-              },
-              Compressor1: {
-                name: 'דוחס1',
-                values: {
-                  ip: (device.device as NetzModel).CompressorIp,
-                  port: null,
-                  MC: (device.device as NetzModel).CompressorMc,
-                  portMC: (device.device as NetzModel).McPort,
-                },
-              },
-              Compressor2: {
-                name: 'דוחס2',
-                values: {
-                  ip: (device.device as NetzModel).CompressorIp2,
-                  port: null,
-                  MC: (device.device as NetzModel).CompressorMc2,
-                  portMC: null,
-                },
-              },
-            },
+            components: NetzComponentsFactory.getNetzComponents(
+              device.device as INetz,
+            ),
           };
         case DeviceType.Aviv:
           return {
             ...device,
-            components: {
-              MagicIp: {
-                name: 'MagicIp',
-                values: {
-                  ip: (device.device as AvivModel).MagicIp,
-                  port: (device.device as AvivModel).Port,
-                  MC: null,
-                  portMC: null,
-                },
-              },
-              Compressor1: {
-                name: 'דוחס1',
-                values: {
-                  ip: (device.device as AvivModel).CompressorIp,
-                  port: null,
-                  MC: (device.device as AvivModel).CompressorMc,
-                  portMC: (device.device as AvivModel).McPort,
-                },
-              },
-              Compressor2: {
-                name: 'דוחס2',
-                values: {
-                  ip: (device.device as AvivModel).CompressorIp2,
-                  port: null,
-                  MC: (device.device as AvivModel).CompressorMc2,
-                  portMC: null,
-                },
-              },
-            },
+            components: AvivComponentsFactory.getAvivComponents(
+              device.device as IAviv,
+            ),
           };
         case DeviceType.Spider:
           return {
             ...device,
-            components: {
-              Computer: {
-                name: 'מחשב1',
-                values: {
-                  ip: (device.device as SpiderModel).ComputerIp,
-                  port: (device.device as SpiderModel).Port,
-                  MC: null,
-                  portMC: null,
-                },
-              },
-              Compressor1: {
-                name: 'דוחס1',
-                values: {
-                  ip: (device.device as AvivModel).CompressorIp,
-                  port: null,
-                  MC: (device.device as AvivModel).CompressorMc,
-                  portMC: (device.device as AvivModel).McPort,
-                },
-              },
-              Compressor2: {
-                name: 'דוחס2',
-                values: {
-                  ip: (device.device as AvivModel).CompressorIp2,
-                  port: null,
-                  MC: (device.device as AvivModel).CompressorMc2,
-                  portMC: null,
-                },
-              },
-            },
+            components: SpiderComponentsFactory.getSpiderComponents(
+              device.device as ISpider,
+            ),
           };
         case DeviceType.Radar:
           return {
@@ -428,10 +309,10 @@ export class DeviceService {
               Computer: {
                 name: 'מחשב1',
                 values: {
-                  ip: (device.device as RadarModel).RadarIP,
+                  ip: (device.device as IRadar).RadarIP,
                   port: null,
                   MC: null,
-                  portMC: (device.device as RadarModel).MarsPort,
+                  portMC: (device.device as IRadar).MarsPort,
                 },
               },
             },
@@ -443,10 +324,10 @@ export class DeviceService {
               Camera: {
                 name: 'מצלמה',
                 values: {
-                  ip: (device.device as SecCameraModel).CameraIp,
+                  ip: (device.device as ISecCamera).CameraIp,
                   port: null,
-                  MC: (device.device as SecCameraModel).CameraMc,
-                  portMC: (device.device as SecCameraModel).McPort,
+                  MC: (device.device as ISecCamera).CameraMc,
+                  portMC: (device.device as ISecCamera).McPort,
                 },
               },
             },
@@ -458,7 +339,7 @@ export class DeviceService {
               controller: {
                 name: '',
                 values: {
-                  ip: (device.device as SecControllerModel).ip,
+                  ip: (device.device as ISecController).ip,
                   port: null,
                   MC: null,
                   portMC: null,

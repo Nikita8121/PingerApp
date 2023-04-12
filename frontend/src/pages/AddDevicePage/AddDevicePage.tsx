@@ -1,16 +1,22 @@
-import { FindAvailAddressForm, AddDeviceModal, Loader } from '@/components';
+import {
+  FindAvailAddressForm,
+  AddDeviceModal,
+  Loader,
+  FindAvailAddressFormRef,
+} from '@/components';
 import { withLayout } from '@/layout/Layout';
 import { ModalMessagesContext } from '@/shared/context/modal.context';
 import { useFindAddressMutation, useAddDeviceMutation } from '@/shared/mutations/device.mutation';
 import axios from 'axios';
-import { useContext } from 'react';
+import { createRef, useContext } from 'react';
 
 export const AddDevicePage = () => {
   const { openModal } = useContext(ModalMessagesContext);
+  const findAvailAddressFormRef = createRef<FindAvailAddressFormRef>();
 
   const onDeviceAdded = () => {
     openModal && openModal('success', 'הוספת אמצעי');
-    resetFindAddress();
+    findAvailAddressFormRef.current?.resetForm();
   };
 
   const onFindAddressFailed = (error: unknown) => {
@@ -54,21 +60,17 @@ export const AddDevicePage = () => {
         masad,
       };
       addDevice(dataToSend);
+      findAvailAddressFormRef.current?.resetForm();
     }
   };
 
-  /* if (isLoadingAddresses || isAddingDevice) {
-    return <Loader size={100} />;
-  } */
-
   return (
     <>
-      <Loader fullPage size={100} />
-      {(isLoadingAddresses || isAddingDevice) && <Loader size={100} />}
+      {(isLoadingAddresses || isAddingDevice) && <Loader fullPage />}
       {isFindAddressSuccess && (
         <AddDeviceModal onCancel={resetFindAddress} onSubmit={onSubmit} data={data} />
       )}
-      <FindAvailAddressForm submitFunc={findAddress} />
+      <FindAvailAddressForm ref={findAvailAddressFormRef} submitFunc={findAddress} />
     </>
   );
 };

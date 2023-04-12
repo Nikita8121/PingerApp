@@ -3,7 +3,7 @@ import { LocationEnum } from '../types/enums/location.enum';
 import { deviceTypes } from '../types/index.types';
 import { IDevice } from '../types/interfaces/device.interface';
 
-export class DevicesGetDto implements IDevice {
+export class DeviceEntity implements IDevice {
   location: LocationEnum;
   hamal: number;
   area: number;
@@ -11,5 +11,12 @@ export class DevicesGetDto implements IDevice {
   deviceType: DeviceType;
   device: deviceTypes;
   isAlive: boolean;
-  hamalName: string;
+  constructor(device: IDevice) {
+    this.location = device.location;
+    this.hamal = device.hamal;
+    this.area = device.area;
+    this.deviceType = device.deviceType;
+    this.device = device.device;
+    this.isAlive = device.isAlive;
+  }
 }

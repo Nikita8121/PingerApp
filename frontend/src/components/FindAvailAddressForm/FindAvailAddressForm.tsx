@@ -1,3 +1,4 @@
+/* eslint-disable react/display-name */
 import {
   Box,
   Button,
@@ -14,52 +15,63 @@ import { useForm } from 'react-hook-form';
 
 import { IFindAvailableAddressData } from '@/shared/api/device.api/device.api.interfaces';
 import { FindAvailAddressFormProps } from './FindAvailAddressForm.props';
-import { DeviceTypeEnum } from '@/shared/types/index.enums';
+import { DeviceTypeEnum, LocationEnum } from '@/shared/types/index.enums';
 import { hamalsConstant } from '../../shared/constants/index.constants';
+import { forwardRef, useImperativeHandle, useEffect } from 'react';
 
-export const FindAvailAddressForm = ({ submitFunc }: FindAvailAddressFormProps) => {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<IFindAvailableAddressData>({
-    resetOptions: {
-      keepValues: true,
-    },
-  });
+export interface FindAvailAddressFormRef {
+  resetForm: () => void;
+}
 
-  return (
-    <form onSubmit={handleSubmit(submitFunc)}>
-      <Grid container columnSpacing={{ xs: 0, md: 3 }} rowSpacing={3}>
-        <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <InputLabel id='place'>מקום</InputLabel>
-            <Select
+export const FindAvailAddressForm = forwardRef<FindAvailAddressFormRef, FindAvailAddressFormProps>(
+  ({ submitFunc }, ref) => {
+    const {
+      register,
+      handleSubmit,
+      formState: { errors },
+      watch,
+      reset,
+    } = useForm<IFindAvailableAddressData>();
+
+    const location = watch('location');
+    const hamal = watch('hamal');
+    const device = watch('deviceType');
+
+    useImperativeHandle(ref, () => ({
+      resetForm() {
+        reset();
+      },
+    }));
+
+    return (
+      <form onSubmit={handleSubmit(submitFunc)}>
+        <Grid container columnSpacing={{ xs: 0, md: 3 }} rowSpacing={3}>
+          <Grid item xs={12} md={6}>
+            <TextField
               {...register('location', {
                 required: { value: true, message: 'צריך לבחור מקום' },
                 valueAsNumber: true,
               })}
               error={!!errors.location}
-              labelId='place'
+              select
               id='place'
+              value={location ?? LocationEnum.hamal}
               fullWidth
               label='מקום'
             >
               <MenuItem value={93}>חמ"ל</MenuItem>
               <MenuItem value={94}>אתר</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <InputLabel id='hamal'>חמ"ל</InputLabel>
-            <Select
+            </TextField>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
               {...register('hamal', {
                 required: { value: true, message: 'צריך לבחור מקום' },
                 valueAsNumber: true,
               })}
+              value={hamal ?? parseInt(Object.keys(hamalsConstant)[0])}
               error={!!errors.location}
-              labelId='hamal'
+              select
               id='hamal'
               fullWidth
               label='שם חמ"ל'
@@ -69,32 +81,30 @@ export const FindAvailAddressForm = ({ submitFunc }: FindAvailAddressFormProps) 
                   {hamalsConstant[parseInt(code)].name}
                 </MenuItem>
               ))}
-            </Select>
-          </FormControl>
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <TextField
-            {...register('area', {
-              required: { value: true, message: 'צריך למלא שדה של מספר אתר' },
-              valueAsNumber: true,
-            })}
-            error={!!errors.area}
-            fullWidth
-            id='מספר אתר'
-            label='מספר אתר'
-            variant='outlined'
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <FormControl fullWidth>
-            <InputLabel id='אמצעי'>אמצעי</InputLabel>
-            <Select
+            </TextField>
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
+              {...register('area', {
+                required: { value: true, message: 'צריך למלא שדה של מספר אתר' },
+                valueAsNumber: true,
+              })}
+              error={!!errors.area}
+              fullWidth
+              id='מספר אתר'
+              label='מספר אתר'
+              variant='outlined'
+            />
+          </Grid>
+          <Grid item xs={12} md={6}>
+            <TextField
               {...register('deviceType', {
                 required: { value: true, message: 'צריך למלא שדה של אמצעי' },
                 valueAsNumber: true,
               })}
+              select
+              value={device || DeviceTypeEnum.Aviv}
               error={!!errors.deviceType}
-              labelId='אמצעי'
               id='אמצעי'
               fullWidth
               label='אמצעי'
@@ -109,10 +119,9 @@ export const FindAvailAddressForm = ({ submitFunc }: FindAvailAddressFormProps) 
                 {DeviceTypeEnum.SecController}
               </MenuItem> */}
               <MenuItem value={DeviceTypeEnum.Spider}>{DeviceTypeEnum.Spider}</MenuItem>
-            </Select>
-          </FormControl>
-        </Grid>
-        {/* <Grid item xs={12} md={6}>
+            </TextField>
+          </Grid>
+          {/* <Grid item xs={12} md={6}>
           <TextField
             {...register('port', {
               required: { value: true, message: 'צריך למלא שדה של Port' },
@@ -125,25 +134,26 @@ export const FindAvailAddressForm = ({ submitFunc }: FindAvailAddressFormProps) 
             variant='outlined'
           />
         </Grid> */}
-        <Grid item xs={12} md={6}>
-          <TextField
-            {...register('masad', {
-              required: false,
-              valueAsNumber: true,
-            })}
-            fullWidth
-            id='מס"ד'
-            label='מס"ד'
-            variant='outlined'
-          />
+          <Grid item xs={12} md={6}>
+            <TextField
+              {...register('masad', {
+                required: false,
+                valueAsNumber: true,
+              })}
+              fullWidth
+              id='מס"ד'
+              label='מס"ד'
+              variant='outlined'
+            />
+          </Grid>
         </Grid>
-      </Grid>
-      <Divider className={styles.divider} />
-      <Box className={styles.actions}>
-        <Button type='submit' variant='contained'>
-          לשלוח פינגים
-        </Button>
-      </Box>
-    </form>
-  );
-};
+        <Divider className={styles.divider} />
+        <Box className={styles.actions}>
+          <Button type='submit' variant='contained'>
+            לשלוח פינגים
+          </Button>
+        </Box>
+      </form>
+    );
+  },
+);

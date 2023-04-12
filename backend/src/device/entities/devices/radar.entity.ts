@@ -1,4 +1,4 @@
-import { IRadar } from '../types/interfaces/devices';
+import { IRadar } from '../../types/interfaces/devices';
 
 export class RadarEntity implements IRadar {
   name: string;

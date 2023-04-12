@@ -1,4 +1,4 @@
-import { ISecCamera } from '../types/interfaces/devices';
+import { ISecCamera } from '../../types/interfaces/devices';
 
 export class SecCameraEntity implements ISecCamera {
   name: string;

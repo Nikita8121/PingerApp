@@ -1,4 +1,4 @@
-import { INetz } from '../types/interfaces/devices';
+import { INetz } from '../../types/interfaces/devices';
 
 export class NetzEntity implements INetz {
   name: string;

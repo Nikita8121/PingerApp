@@ -1,4 +1,4 @@
-import { IBarkan } from '../types/interfaces/devices';
+import { IBarkan } from '../../types/interfaces/devices';
 
 export class BarkanEntity implements IBarkan {
   name: string;

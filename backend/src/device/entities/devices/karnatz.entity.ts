@@ -1,4 +1,4 @@
-import { IKarnatz } from '../types/interfaces/devices';
+import { IKarnatz } from '../../types/interfaces/devices';
 
 export class KarnatzEntity implements IKarnatz {
   name: string;

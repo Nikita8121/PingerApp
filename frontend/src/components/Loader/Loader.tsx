@@ -8,7 +8,12 @@ export const Loader = ({ size = 40, fullPage }: LoaderProps) => {
         height: '100vh',
         width: '100vw',
         display: 'flex',
+        backgroundColor: '#f5f6f8',
+        top: 0,
+        left: 0,
+        zIndex: 100,
         justifyContent: 'center',
+        alignItems: 'center',
       }
     : {
         display: 'flex',
@@ -18,7 +23,7 @@ export const Loader = ({ size = 40, fullPage }: LoaderProps) => {
 
   return (
     <Box sx={styles}>
-      <CircularProgress size={size} />
+      <CircularProgress size={fullPage ? 100 : size} />
     </Box>
   );
 };

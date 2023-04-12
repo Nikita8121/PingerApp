@@ -2,43 +2,12 @@ import { mongoose, prop } from '@typegoose/typegoose';
 import { TimeStamps, Base } from '@typegoose/typegoose/lib/defaultClasses';
 
 import { DeviceType } from './types/enums/device-type.enum';
-import {
-  AvivModel,
-  BarkanModel,
-  KarnatzModel,
-  NetzModel,
-  RadarModel,
-  SecCameraModel,
-  SecControllerModel,
-  SpiderModel,
-} from './models';
 import { LocationEnum } from './types/enums/location.enum';
-
-// #region shit code, need changes
-type devicesTypes =
-  | AvivModel
-  | BarkanModel
-  | KarnatzModel
-  | NetzModel
-  | RadarModel
-  | SecCameraModel
-  | SecControllerModel
-  | SpiderModel;
-
-const devicesTypes =
-  AvivModel ||
-  BarkanModel ||
-  KarnatzModel ||
-  NetzModel ||
-  RadarModel ||
-  SecCameraModel ||
-  SecControllerModel ||
-  SpiderModel;
-
-//#endregion
+import { deviceTypes } from './types/index.types';
+import { IDevice } from './types/interfaces/device.interface';
 
 export interface DeviceModel extends Base {}
-export class DeviceModel extends TimeStamps {
+export class DeviceModel extends TimeStamps implements IDevice {
   @prop({ type: Number, enum: LocationEnum })
   location: LocationEnum;
 
@@ -58,7 +27,7 @@ export class DeviceModel extends TimeStamps {
     type: mongoose.Schema.Types.Mixed,
     _id: false,
   })
-  device: devicesTypes;
+  device: deviceTypes;
   @prop({ type: Boolean })
   isAlive: boolean;
 }

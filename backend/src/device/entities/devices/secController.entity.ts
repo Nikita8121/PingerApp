@@ -1,4 +1,4 @@
-import { ISecController } from '../types/interfaces/devices';
+import { ISecController } from '../../types/interfaces/devices';
 
 export class SecControllerEntity implements ISecController {
   name: string;

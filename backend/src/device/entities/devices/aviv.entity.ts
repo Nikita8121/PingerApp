@@ -1,4 +1,4 @@
-import { IAviv } from '../types/interfaces/devices';
+import { IAviv } from '../../types/interfaces/devices';
 
 export class AvivEntity implements IAviv {
   name: string;
