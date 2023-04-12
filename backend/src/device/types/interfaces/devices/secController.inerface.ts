@@ -1,4 +1,4 @@
-export class ISecController {
+export interface ISecController {
   name: string;
   ip: string;
   subMask: string;

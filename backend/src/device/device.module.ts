@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { DeviceService } from './device.service';
+import { DeviceService } from './services/device.service';
 import { DeviceController } from './device.controller';
 import { TypegooseModule } from 'nestjs-typegoose';
 import { DeviceModel } from './device.model';
 import { PingerHelperModule } from 'src/utils/pingerHelper/pingerHelper.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { CheckAddressAvailabilityHelperService } from './services/helpers/check-address-availability-for-device-helper.service';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       },
     ]),
   ],
-  providers: [DeviceService],
+  providers: [DeviceService, CheckAddressAvailabilityHelperService],
   controllers: [DeviceController],
 })
 export class DeviceModule {}

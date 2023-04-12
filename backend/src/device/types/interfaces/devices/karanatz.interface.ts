@@ -1,4 +1,4 @@
-export class IKarnatz {
+export interface IKarnatz {
   name: string;
   sensorNum: number;
   ComputerIp: string;

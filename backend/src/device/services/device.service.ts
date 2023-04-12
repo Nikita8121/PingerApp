@@ -1,12 +1,12 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from 'nestjs-typegoose';
-import { DeviceModel } from './device.model';
-import { DeviceCreateDto } from './dto/device-create.dto';
+import { DeviceModel } from '../device.model';
+import { DeviceCreateDto } from '../dto/device-create.dto';
 import { ModelType } from '@typegoose/typegoose/lib/types';
 import { PingerHelperService } from 'src/utils/pingerHelper/pingerHelper.service';
-import { AvailableAddressForDeviceDto } from './dto/device-available.dto';
+import { AvailableAddressForDeviceDto } from '../dto/device-available.dto';
 
-import { DeviceDeleteDto } from './dto/device.delete.dto';
+import { DeviceDeleteDto } from '../dto/device.delete.dto';
 import {
   findAvailableAddressForAviv,
   findAvailableAddressForBarkan,
@@ -15,35 +15,17 @@ import {
   findAvailableAddressForRadar,
   findAvailableAddressForSecCamera,
   findAvailableAddressForSpider,
-} from './helpers/find-available-address-for-device';
-import { AvailableAddressDto } from './dto/device-available-address-results.dto';
+} from '../helpers/find-available-address-for-device';
+import { AvailableAddressDto } from '../dto/device-available-address-results.dto';
 import { Interval } from '@nestjs/schedule';
-import { DeviceType } from './types/enums/device-type.enum';
-import {
-  isAvivAlive,
-  isBarkanAlive,
-  isKarnatzAlive,
-  isNetzAlive,
-  isRadarAlive,
-  isSecCameraAlive,
-  isSpiderAlive,
-} from './helpers/check-address-availability-for-device';
-import { groupBy } from '../helpers/groupByArray.helper';
-import {
-  AvivModel,
-  BarkanModel,
-  KarnatzModel,
-  NetzModel,
-  RadarModel,
-  SecCameraModel,
-  SecControllerModel,
-  SpiderModel,
-} from './models';
-import { DevicesGetDto } from './dto/devices-get.dto';
-import { hamals } from './helpers/device.constants';
-import { DeviceFactory } from './factories/device.factory';
-import { IHamal } from './types/interfaces/hamal.interface';
-import { enrichedDeviceType } from './types/index.types';
+import { DeviceType } from '../types/enums/device-type.enum';
+import { CheckAddressAvailabilityHelperService } from './helpers/check-address-availability-for-device-helper.service';
+import { groupBy } from '../../helpers/groupByArray.helper';
+import { DevicesGetDto } from '../dto/devices-get.dto';
+import { hamals } from '../helpers/device.constants';
+import { DeviceFactory } from '../factories/device.factory';
+import { IHamal } from '../types/interfaces/hamal.interface';
+import { enrichedDeviceType } from '../types/index.types';
 import {
   IAviv,
   IBarkan,
@@ -53,12 +35,15 @@ import {
   ISecCamera,
   ISecController,
   ISpider,
-} from './types/interfaces/devices';
-import { KarnatzComponentsFactory } from './factories/components/karnatz-components.factory';
-import { BarkanComponentsFactory } from './factories/components/barkan-components.factory';
-import { NetzComponentsFactory } from './factories/components/netz-components.factory';
-import { AvivComponentsFactory } from './factories/components/aviv-components.factory';
-import { SpiderComponentsFactory } from './factories/components/spider-components.factory';
+} from '../types/interfaces/devices';
+import { KarnatzComponentsFactory } from '../factories/components/karnatz-components.factory';
+import { BarkanComponentsFactory } from '../factories/components/barkan-components.factory';
+import { NetzComponentsFactory } from '../factories/components/netz-components.factory';
+import { AvivComponentsFactory } from '../factories/components/aviv-components.factory';
+import { SpiderComponentsFactory } from '../factories/components/spider-components.factory';
+import { RadarComponentsFactory } from '../factories/components/radar-components.factory';
+import { SecCameraComponentsFactory } from '../factories/components/sec-camera-components.factory';
+import { SecControllerFactory } from '../factories/components/sec-controller.factory';
 
 const amountOfDevices: number = 9;
 
@@ -68,6 +53,7 @@ export class DeviceService {
     @InjectModel(DeviceModel)
     private readonly deviceModel: ModelType<DeviceModel>,
     private readonly pingerHelperService: PingerHelperService,
+    private readonly CheckAddressAvailabilityHelperService: CheckAddressAvailabilityHelperService,
   ) {}
 
   /**
@@ -197,58 +183,13 @@ export class DeviceService {
     const devices = await this.deviceModel.find({});
     devices.map((device) => {
       const deviceObject = device.toObject();
-      switch (deviceObject.deviceType) {
-        case DeviceType.Aviv:
-          isAvivAlive(this.pingerHelperService, device).then((res) => {
-            const isAlive = Object.values(res).some((prop) => prop === true);
-            device.$set({ isAlive: isAlive });
-            device.save();
-          });
-          return;
-        case DeviceType.Barkan:
-          isBarkanAlive(this.pingerHelperService, device).then((res) => {
-            const isAlive = Object.values(res).some((prop) => prop === true);
-            device.$set({ isAlive: isAlive });
-            device.save();
-          });
-          return;
-        case DeviceType.Karnatz:
-          isKarnatzAlive(this.pingerHelperService, device).then((res) => {
-            const isAlive = Object.values(res).some((prop) => prop === true);
-            device.$set({ isAlive: isAlive });
-            device.save();
-          });
-          return;
-        case DeviceType.Netz:
-          isNetzAlive(this.pingerHelperService, device).then((res) => {
-            const isAlive = Object.values(res).some((prop) => prop === true);
-            device.$set({ isAlive: isAlive });
-            device.save();
-          });
-          return;
-        case DeviceType.Radar:
-          isRadarAlive(this.pingerHelperService, device).then((res) => {
-            const isAlive = Object.values(res).some((prop) => prop === true);
-            device.$set({ isAlive: isAlive });
-            device.save();
-          });
-          return;
-        case DeviceType.SecCamera:
-          isSecCameraAlive(this.pingerHelperService, device).then((res) => {
-            const isAlive = Object.values(res).some((prop) => prop === true);
-            device.$set({ isAlive: isAlive });
-            device.save();
-          });
-          return;
-        case DeviceType.SecController:
-          return;
-        case DeviceType.Spider:
-          isSpiderAlive(this.pingerHelperService, device).then((res) => {
-            const isAlive = Object.values(res).some((prop) => prop === true);
-            device.$set({ isAlive: isAlive });
-            device.save();
-          });
-          return;
+      const isDeviceAvailable =
+        this.CheckAddressAvailabilityHelperService.checkAddressAvailability(
+          deviceObject,
+        );
+      if (isDeviceAvailable) {
+        device.$set({ isAlive: isDeviceAvailable });
+        device.save();
       }
     });
   }
@@ -305,47 +246,23 @@ export class DeviceService {
         case DeviceType.Radar:
           return {
             ...device,
-            components: {
-              Computer: {
-                name: 'מחשב1',
-                values: {
-                  ip: (device.device as IRadar).RadarIP,
-                  port: null,
-                  MC: null,
-                  portMC: (device.device as IRadar).MarsPort,
-                },
-              },
-            },
+            components: RadarComponentsFactory.getRadarComponents(
+              device.device as IRadar,
+            ),
           };
         case DeviceType.SecCamera:
           return {
             ...device,
-            components: {
-              Camera: {
-                name: 'מצלמה',
-                values: {
-                  ip: (device.device as ISecCamera).CameraIp,
-                  port: null,
-                  MC: (device.device as ISecCamera).CameraMc,
-                  portMC: (device.device as ISecCamera).McPort,
-                },
-              },
-            },
+            components: SecCameraComponentsFactory.getSecCameraComponents(
+              device.device as ISecCamera,
+            ),
           };
         case DeviceType.SecController:
           return {
             ...device,
-            components: {
-              controller: {
-                name: '',
-                values: {
-                  ip: (device.device as ISecController).ip,
-                  port: null,
-                  MC: null,
-                  portMC: null,
-                },
-              },
-            },
+            components: SecControllerFactory.getSecControllerComponents(
+              device.device as ISecController,
+            ),
           };
       }
     });

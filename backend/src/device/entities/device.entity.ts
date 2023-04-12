@@ -15,6 +15,7 @@ export class DeviceEntity implements IDevice {
     this.location = device.location;
     this.hamal = device.hamal;
     this.area = device.area;
+    this.ip = device.ip;
     this.deviceType = device.deviceType;
     this.device = device.device;
     this.isAlive = device.isAlive;

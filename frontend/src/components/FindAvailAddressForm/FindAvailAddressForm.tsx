@@ -103,7 +103,7 @@ export const FindAvailAddressForm = forwardRef<FindAvailAddressFormRef, FindAvai
                 valueAsNumber: true,
               })}
               select
-              value={device || DeviceTypeEnum.Aviv}
+              value={device || 'Aviv'}
               error={!!errors.deviceType}
               id='אמצעי'
               fullWidth

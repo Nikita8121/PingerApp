@@ -1,4 +1,4 @@
-export class IBarkan {
+export interface IBarkan {
   name: string;
   sensorNum: number;
   ComputerIp: string;

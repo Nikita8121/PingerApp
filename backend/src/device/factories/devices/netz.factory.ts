@@ -1,19 +1,15 @@
 import { DeviceCreateDto } from '../../dto/device-create.dto';
 import { NetzEntity } from '../../entities/devices/netz.entity';
 import {
-  CameraMc,
   Compressor,
   Compressor2,
   Compressor2MC,
   CompressorMC,
-  computerIP2,
   DefaultGateway,
   hamals,
   KVM,
-  MCPort,
   Port,
   ProxyPort,
-  RadarIP,
   SubMask,
 } from '../../helpers/device.constants';
 

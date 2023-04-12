@@ -1,7 +1,6 @@
 import { DeviceCreateDto } from '../../dto/device-create.dto';
 import { KarnatzEntity } from '../../entities/devices/karnatz.entity';
 import {
-  CameraMc,
   Compressor,
   Compressor2,
   Compressor2MC,
@@ -9,11 +8,8 @@ import {
   computerIP2,
   DefaultGateway,
   hamals,
-  KVM,
-  MCPort,
   Port,
   ProxyPort,
-  RadarIP,
   SubMask,
 } from '../../helpers/device.constants';
 

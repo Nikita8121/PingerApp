@@ -4,12 +4,10 @@ import {
   HttpCode,
   Post,
   Get,
-  Query,
   BadRequestException,
-  Delete,
 } from '@nestjs/common';
 import { DeviceCreateDto } from './dto/device-create.dto';
-import { DeviceService } from './device.service';
+import { DeviceService } from './services/device.service';
 
 import { DeviceDeleteDto } from './dto/device.delete.dto';
 
@@ -52,7 +50,7 @@ export class DeviceController {
   }
 
   @Get('excel')
-  async excel(){
+  async excel() {
     return this.devicesService.getDataForExcel();
   }
 }

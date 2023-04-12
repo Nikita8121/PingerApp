@@ -1,4 +1,4 @@
-export class ISecCamera {
+export interface ISecCamera {
   name: string;
   cameraNum: number;
   CameraIp: string;

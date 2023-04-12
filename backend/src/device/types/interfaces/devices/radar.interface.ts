@@ -1,4 +1,4 @@
-export class IRadar {
+export interface IRadar {
   name: string;
   radarNum: number;
   RadarIP: string;

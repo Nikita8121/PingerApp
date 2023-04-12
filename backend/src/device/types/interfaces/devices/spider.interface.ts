@@ -1,4 +1,4 @@
-export class ISpider {
+export interface ISpider {
   name: string;
   sensorNum: number;
   ComputerIp: string;

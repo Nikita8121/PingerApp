@@ -1,4 +1,4 @@
-export class IAviv {
+export interface IAviv {
   name: string;
   sensorNum: number;
   MagicIp: string;

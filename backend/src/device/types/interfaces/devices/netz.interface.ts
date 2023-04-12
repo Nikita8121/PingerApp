@@ -1,4 +1,4 @@
-export class INetz {
+export interface INetz {
   name: string;
   sensorNum: number;
   IUIp: string;
