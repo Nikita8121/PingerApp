@@ -1,25 +1,49 @@
 import { PingerHelperService } from 'src/utils/pingerHelper/pingerHelper.service';
-import { DeviceModel } from '../device.model';
-import { ModelType } from '@typegoose/typegoose/lib/types';
-import { AvailableAddressForDeviceDto } from '../dto/device-available.dto';
+import { AvailableAddressForDeviceDto } from '../../dto/device-available.dto';
 import {
   Compressor,
   Compressor2,
   computerIP2,
   Port,
   RadarIP,
-} from './device.constants';
+} from '../../helpers/device.constants';
 import { Injectable } from '@nestjs/common';
-import { DeviceRepository } from '../device.repository';
+import { DeviceRepository } from '../../device.repository';
+import { DeviceType } from 'src/device/types/enums/device-type.enum';
 
 const amountOfDevices = 9;
 
 @Injectable()
-export class FindAvailAddressForDeviceService {
+export class FindAvailAddressForDeviceHelperService {
   constructor(
     private readonly deviceRepository: DeviceRepository,
     private readonly pingerService: PingerHelperService,
   ) {}
+
+  public async findAvailAddressForDevice(
+    dto: AvailableAddressForDeviceDto,
+  ): Promise<{
+    [key: string]: string;
+  }> {
+    switch (dto.deviceType) {
+      case DeviceType.Aviv:
+        return await this.findAvailableAddressForAviv(dto);
+      case DeviceType.Barkan:
+        return await this.findAvailableAddressForBarkan(dto);
+      case DeviceType.Karnatz:
+        return await this.findAvailableAddressForKarnatz(dto);
+      case DeviceType.Netz:
+        return await this.findAvailableAddressForNetz(dto);
+      case DeviceType.Radar:
+        return await this.findAvailableAddressForRadar(dto);
+      case DeviceType.SecCamera:
+        return await this.findAvailableAddressForSecCamera(dto);
+      case DeviceType.SecController:
+        return;
+      case DeviceType.Spider:
+        return await this.findAvailableAddressForSpider(dto);
+    }
+  }
 
   private isAddressAvailableForSpivivtz = async (
     ip: string,
@@ -294,9 +318,7 @@ export class FindAvailAddressForDeviceService {
 
     for (let i = 1; i <= amountOfDevices; i++) {
       const promise = new Promise(async (res) => {
-        if (
-          await isAddressAvailableForBarkan(deviceModel, pingerService, ip, i)
-        ) {
+        if (await this.isAddressAvailableForBarkan(ip, i)) {
           res({
             ip: ip + i,
           });
@@ -315,142 +337,108 @@ export class FindAvailAddressForDeviceService {
 
     return null;
   };
+
+  private isAddressAvailableForRadar = async (
+    ip: string,
+    masad: number,
+  ): Promise<boolean> => {
+    const isDeviceExists = this.deviceRepository
+      .getById(ip + masad)
+      .then((res) => res);
+    const isAddressAvailable = this.pingerService
+      .isHostAlive(ip + RadarIP + masad)
+      .then((res) => res.isAlive);
+    return (await Promise.all([isDeviceExists, isAddressAvailable])).every(
+      (res) => !res,
+    );
+  };
+
+  private findAvailableAddressForRadar = async (
+    dto: AvailableAddressForDeviceDto,
+  ): Promise<{ ip: string }> => {
+    const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
+
+    if (dto.masad) {
+      if (await this.isAddressAvailableForRadar(ip, dto.masad)) {
+        return {
+          ip: ip + RadarIP + dto.masad,
+        };
+      }
+      return null;
+    }
+
+    const promises = [];
+
+    for (let i = 1; i <= amountOfDevices; i++) {
+      const promise = new Promise(async (res) => {
+        if (await this.isAddressAvailableForRadar(ip, i)) {
+          res({
+            ip: ip + RadarIP + i,
+          });
+        } else {
+          res(false);
+        }
+      });
+      promises.push(promise);
+    }
+
+    const addresses = (await Promise.all(promises)).find((el) => el != false);
+
+    if (addresses) {
+      return addresses;
+    }
+
+    return null;
+  };
+
+  private isAddressAvailableForSecCamera = async (
+    ip: string,
+    masad: number,
+  ): Promise<boolean> => {
+    const isDeviceExists = this.deviceRepository.getById(ip + masad);
+    const isAddressAvailable = this.pingerService
+      .isHostAlive(ip + Port + masad)
+      .then((res) => res.isAlive);
+    return (await Promise.all([isDeviceExists, isAddressAvailable])).every(
+      (res) => !res,
+    );
+  };
+
+  private findAvailableAddressForSecCamera = async (
+    dto: AvailableAddressForDeviceDto,
+  ): Promise<{ ip: string }> => {
+    const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
+
+    if (dto.masad) {
+      if (await this.isAddressAvailableForSecCamera(ip, dto.masad)) {
+        return {
+          ip: ip + Port + dto.masad,
+        };
+      }
+      return null;
+    }
+
+    const promises = [];
+
+    for (let i = 1; i <= amountOfDevices; i++) {
+      const promise = new Promise(async (res) => {
+        if (await this.isAddressAvailableForSecCamera(ip, i)) {
+          res({
+            ip: ip + Port + i,
+          });
+        } else {
+          res(false);
+        }
+      });
+      promises.push(promise);
+    }
+
+    const addresses = (await Promise.all(promises)).find((el) => el != false);
+
+    if (addresses) {
+      return addresses;
+    }
+
+    return null;
+  };
 }
-
-//#region Barkan
-
-//#endregion
-
-//#region Radar
-const isAddressAvailableForRadar = async (
-  deviceModel: ModelType<DeviceModel>,
-  pingerService: PingerHelperService,
-  ip: string,
-  masad: number,
-): Promise<boolean> => {
-  const isDeviceExists = deviceModel
-    .findOne({ ip: ip + masad })
-    .then((res) => res);
-  const isAddressAvailable = pingerService
-    .isHostAlive(ip + RadarIP + masad)
-    .then((res) => res.isAlive);
-  return (await Promise.all([isDeviceExists, isAddressAvailable])).every(
-    (res) => !res,
-  );
-};
-
-export const findAvailableAddressForRadar = async (
-  dto: AvailableAddressForDeviceDto,
-  amountOfDevices: number,
-  pingerService: PingerHelperService,
-  deviceModel: ModelType<DeviceModel>,
-): Promise<{ ip: string }> => {
-  const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
-
-  if (dto.masad) {
-    if (
-      await isAddressAvailableForRadar(
-        deviceModel,
-        pingerService,
-        ip,
-        dto.masad,
-      )
-    ) {
-      return {
-        ip: ip + RadarIP + dto.masad,
-      };
-    }
-    return null;
-  }
-
-  const promises = [];
-
-  for (let i = 1; i <= amountOfDevices; i++) {
-    const promise = new Promise(async (res) => {
-      if (await isAddressAvailableForRadar(deviceModel, pingerService, ip, i)) {
-        res({
-          ip: ip + RadarIP + i,
-        });
-      } else {
-        res(false);
-      }
-    });
-    promises.push(promise);
-  }
-
-  const addresses = (await Promise.all(promises)).find((el) => el != false);
-
-  if (addresses) {
-    return addresses;
-  }
-
-  return null;
-};
-//#endregion
-
-//#region  SecCamera
-const isAddressAvailableForSecCamera = async (
-  deviceModel: ModelType<DeviceModel>,
-  pingerService: PingerHelperService,
-  ip: string,
-  masad: number,
-): Promise<boolean> => {
-  const isDeviceExists = deviceModel.findOne({ ip: ip + masad });
-  const isAddressAvailable = pingerService
-    .isHostAlive(ip + Port + masad)
-    .then((res) => res.isAlive);
-  return (await Promise.all([isDeviceExists, isAddressAvailable])).every(
-    (res) => !res,
-  );
-};
-
-export const findAvailableAddressForSecCamera = async (
-  dto: AvailableAddressForDeviceDto,
-  amountOfDevices: number,
-  pingerService: PingerHelperService,
-  deviceModel: ModelType<DeviceModel>,
-): Promise<{ ip: string }> => {
-  const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
-
-  if (dto.masad) {
-    if (
-      await isAddressAvailableForSecCamera(
-        deviceModel,
-        pingerService,
-        ip,
-        dto.masad,
-      )
-    ) {
-      return {
-        ip: ip + Port + dto.masad,
-      };
-    }
-    return null;
-  }
-
-  const promises = [];
-
-  for (let i = 1; i <= amountOfDevices; i++) {
-    const promise = new Promise(async (res) => {
-      if (
-        await isAddressAvailableForSecCamera(deviceModel, pingerService, ip, i)
-      ) {
-        res({
-          ip: ip + Port + i,
-        });
-      } else {
-        res(false);
-      }
-    });
-    promises.push(promise);
-  }
-
-  const addresses = (await Promise.all(promises)).find((el) => el != false);
-
-  if (addresses) {
-    return addresses;
-  }
-
-  return null;
-};
-//#endregion

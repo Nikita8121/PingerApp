@@ -7,6 +7,7 @@ import { PingerHelperModule } from 'src/utils/pingerHelper/pingerHelper.module';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CheckAddressAvailabilityHelperService } from './services/helpers/check-address-availability-for-device-helper.service';
 import { DeviceRepository } from './device.repository';
+import { FindAvailAddressForDeviceHelperService } from './services/helpers/find-available-address-for-device.service';
 
 @Module({
   imports: [
@@ -25,6 +26,7 @@ import { DeviceRepository } from './device.repository';
     DeviceService,
     CheckAddressAvailabilityHelperService,
     DeviceRepository,
+    FindAvailAddressForDeviceHelperService,
   ],
   controllers: [DeviceController],
 })

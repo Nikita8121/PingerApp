@@ -4,15 +4,7 @@ import { PingerHelperService } from 'src/utils/pingerHelper/pingerHelper.service
 import { AvailableAddressForDeviceDto } from '../dto/device-available.dto';
 
 import { DeviceDeleteDto } from '../dto/device.delete.dto';
-import {
-  findAvailableAddressForAviv,
-  findAvailableAddressForBarkan,
-  findAvailableAddressForKarnatz,
-  findAvailableAddressForNetz,
-  findAvailableAddressForRadar,
-  findAvailableAddressForSecCamera,
-  findAvailableAddressForSpider,
-} from '../helpers/find-available-address-for-device';
+import { FindAvailAddressForDeviceHelperService } from './helpers/find-available-address-for-device.service';
 import { AvailableAddressDto } from '../dto/device-available-address-results.dto';
 import { Interval } from '@nestjs/schedule';
 import { DeviceType } from '../types/enums/device-type.enum';
@@ -51,7 +43,8 @@ export class DeviceService {
   constructor(
     private readonly deviceRepository: DeviceRepository,
     private readonly pingerHelperService: PingerHelperService,
-    private readonly CheckAddressAvailabilityHelperService: CheckAddressAvailabilityHelperService,
+    private readonly checkAddressAvailabilityHelperService: CheckAddressAvailabilityHelperService,
+    private readonly findAvailAddressForDeviceHelperService: FindAvailAddressForDeviceHelperService,
   ) {}
 
   /**
@@ -98,68 +91,11 @@ export class DeviceService {
   async findAvailableAddress(
     dto: AvailableAddressForDeviceDto,
   ): Promise<AvailableAddressDto> {
-    let addresses: { [key: string]: string };
+    const addresses =
+      await this.findAvailAddressForDeviceHelperService.findAvailAddressForDevice(
+        dto,
+      );
 
-    switch (dto.deviceType) {
-      case DeviceType.Aviv:
-        addresses = await findAvailableAddressForAviv(
-          dto,
-          amountOfDevices,
-          this.pingerHelperService,
-          this.deviceModel,
-        );
-        break;
-      case DeviceType.Barkan:
-        addresses = await findAvailableAddressForBarkan(
-          dto,
-          amountOfDevices,
-          this.pingerHelperService,
-          this.deviceModel,
-        );
-        break;
-      case DeviceType.Karnatz:
-        addresses = await findAvailableAddressForKarnatz(
-          dto,
-          amountOfDevices,
-          this.pingerHelperService,
-          this.deviceModel,
-        );
-        break;
-      case DeviceType.Netz:
-        addresses = await findAvailableAddressForNetz(
-          dto,
-          amountOfDevices,
-          this.pingerHelperService,
-          this.deviceModel,
-        );
-        break;
-      case DeviceType.Radar:
-        addresses = await findAvailableAddressForRadar(
-          dto,
-          amountOfDevices,
-          this.pingerHelperService,
-          this.deviceModel,
-        );
-        break;
-      case DeviceType.SecCamera:
-        addresses = await findAvailableAddressForSecCamera(
-          dto,
-          amountOfDevices,
-          this.pingerHelperService,
-          this.deviceModel,
-        );
-        break;
-      case DeviceType.SecController:
-        break;
-      case DeviceType.Spider:
-        addresses = await findAvailableAddressForSpider(
-          dto,
-          amountOfDevices,
-          this.pingerHelperService,
-          this.deviceModel,
-        );
-        break;
-    }
     if (addresses) {
       return {
         addresses,
@@ -179,7 +115,7 @@ export class DeviceService {
     devices.map((device) => {
       const deviceObject = device.toObject();
       const isDeviceAvailable =
-        this.CheckAddressAvailabilityHelperService.checkAddressAvailability(
+        this.checkAddressAvailabilityHelperService.checkAddressAvailability(
           deviceObject,
         );
       if (isDeviceAvailable) {
