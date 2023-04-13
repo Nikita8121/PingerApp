@@ -1,8 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { InjectModel } from 'nestjs-typegoose';
-import { DeviceModel } from '../device.model';
 import { DeviceCreateDto } from '../dto/device-create.dto';
-import { ModelType } from '@typegoose/typegoose/lib/types';
 import { PingerHelperService } from 'src/utils/pingerHelper/pingerHelper.service';
 import { AvailableAddressForDeviceDto } from '../dto/device-available.dto';
 
@@ -44,14 +41,15 @@ import { SpiderComponentsFactory } from '../factories/components/spider-componen
 import { RadarComponentsFactory } from '../factories/components/radar-components.factory';
 import { SecCameraComponentsFactory } from '../factories/components/sec-camera-components.factory';
 import { SecControllerFactory } from '../factories/components/sec-controller.factory';
+import { DeviceRepository } from '../device.repository';
+import { IDevice } from '../types/interfaces/device.interface';
 
 const amountOfDevices: number = 9;
 
 @Injectable()
 export class DeviceService {
   constructor(
-    @InjectModel(DeviceModel)
-    private readonly deviceModel: ModelType<DeviceModel>,
+    private readonly deviceRepository: DeviceRepository,
     private readonly pingerHelperService: PingerHelperService,
     private readonly CheckAddressAvailabilityHelperService: CheckAddressAvailabilityHelperService,
   ) {}
@@ -63,14 +61,14 @@ export class DeviceService {
    * @erorr throws for device cords that have been taken
    */
 
-  async addDevice(deviceCreateDto: DeviceCreateDto): Promise<DeviceModel> {
-    if (await this.deviceModel.findOne({ ip: deviceCreateDto.ip }))
+  async addDevice(deviceCreateDto: DeviceCreateDto): Promise<IDevice> {
+    if (await this.deviceRepository.findByIp(deviceCreateDto.ip))
       throw new BadRequestException('cords taken');
 
     const deviceFactory = new DeviceFactory(deviceCreateDto);
     const deviceEntity = deviceFactory.getDeviceEntity();
 
-    return this.deviceModel.create(deviceEntity);
+    return this.deviceRepository.create(deviceEntity);
   }
 
   /**
@@ -79,20 +77,17 @@ export class DeviceService {
    * @returns the id of the deleted device
    */
   async deleteDevice(deviceDeleteDto: DeviceDeleteDto) {
-    const device = await this.deviceModel.findById(deviceDeleteDto.id);
+    const device = await this.deviceRepository.getById(deviceDeleteDto.id);
     if (device) {
-      await this.deviceModel.findByIdAndDelete(deviceDeleteDto.id);
-      return { id: deviceDeleteDto };
+      return this.deviceRepository.delete(deviceDeleteDto.id);
     }
     return undefined;
   }
 
   async deleteDevices(devicesDeleteDto: DeviceDeleteDto[]) {
-    return this.deviceModel.deleteMany({
-      _id: {
-        $in: devicesDeleteDto,
-      },
-    });
+    return this.deviceRepository.deleteMany(
+      devicesDeleteDto.map((el) => el.id),
+    );
   }
 
   /**
@@ -180,7 +175,7 @@ export class DeviceService {
    */
   @Interval(1000 * 60 * 60 * 24)
   async checkDevices(): Promise<void> {
-    const devices = await this.deviceModel.find({});
+    const devices = await this.deviceRepository.getAll();
     devices.map((device) => {
       const deviceObject = device.toObject();
       const isDeviceAvailable =
@@ -194,17 +189,17 @@ export class DeviceService {
     });
   }
 
-  async getDevices(): Promise<DevicesGetDto[]> {
-    return (await this.deviceModel.find({})).map((device) => {
+  async getDevicesWithHamal(): Promise<DevicesGetDto[]> {
+    return (await this.deviceRepository.getAll()).map((device) => {
       return {
-        ...(device.toObject() as DeviceModel),
+        ...(device.toObject() as IDevice),
         hamalName: hamals[device.hamal].name,
       };
     });
   }
 
   async getDataForExcel(): Promise<IHamal[]> {
-    const devices = await this.getDevices();
+    const devices = await this.getDevicesWithHamal();
 
     const enrichedDevices: enrichedDeviceType[] = devices.map((device) => {
       switch (device.deviceType) {

@@ -9,375 +9,316 @@ import {
   Port,
   RadarIP,
 } from './device.constants';
+import { Injectable } from '@nestjs/common';
+import { DeviceRepository } from '../device.repository';
 
-const isAddressAvailableForSpivivtz = async (
-  deviceModel: ModelType<DeviceModel>,
-  pingerService: PingerHelperService,
-  ip: string,
-  masad: number,
-): Promise<boolean> => {
-  const compressorIp = `${ip}${Compressor}`;
-  const compressorIp2 = `${ip}${Compressor2}`;
+const amountOfDevices = 9;
 
-  const isDeviceExist = deviceModel
-    .findOne({ ip: ip + masad })
-    .then((res) => res);
-  const isAddressAvailable = pingerService
-    .isHostAlive(ip + masad)
-    .then((res) => res.isAlive);
-  const isCompressorIpAvailable = pingerService
-    .isHostAlive(compressorIp + masad)
-    .then((res) => res.isAlive);
+@Injectable()
+export class FindAvailAddressForDeviceService {
+  constructor(
+    private readonly deviceRepository: DeviceRepository,
+    private readonly pingerService: PingerHelperService,
+  ) {}
 
-  return (
-    await Promise.all([
-      isDeviceExist,
-      isAddressAvailable,
-      isCompressorIpAvailable,
-    ])
-  ).every((res) => !res);
-};
+  private isAddressAvailableForSpivivtz = async (
+    ip: string,
+    masad: number,
+  ): Promise<boolean> => {
+    const compressorIp = `${ip}${Compressor}`;
+    const compressorIp2 = `${ip}${Compressor2}`;
 
-//#region Spider
-export const findAvailableAddressForSpider = async (
-  dto: AvailableAddressForDeviceDto,
-  amountOfDevices: number,
-  pingerService: PingerHelperService,
-  deviceModel: ModelType<DeviceModel>,
-): Promise<{ ip: string; compressorIp: string; compressorIp2: string }> => {
-  const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
-  const compressorIp = `${ip}${Compressor}`;
-  const compressorIp2 = `${ip}${Compressor2}`;
+    const isDeviceExist = this.deviceRepository
+      .findByIp(ip + masad)
+      .then((res) => res);
+    const isAddressAvailable = this.pingerService
+      .isHostAlive(ip + masad)
+      .then((res) => res.isAlive);
+    const isCompressorIpAvailable = this.pingerService
+      .isHostAlive(compressorIp + masad)
+      .then((res) => res.isAlive);
 
-  if (dto.masad) {
-    if (
-      await isAddressAvailableForSpivivtz(
-        deviceModel,
-        pingerService,
-        ip,
-        dto.masad,
-      )
-    ) {
-      return {
-        ip: ip + dto.masad,
-        compressorIp: compressorIp + dto.masad,
-        compressorIp2: compressorIp2 + dto.masad,
-      };
+    return (
+      await Promise.all([
+        isDeviceExist,
+        isAddressAvailable,
+        isCompressorIpAvailable,
+      ])
+    ).every((res) => !res);
+  };
+
+  private findAvailableAddressForSpider = async (
+    dto: AvailableAddressForDeviceDto,
+  ): Promise<{ ip: string; compressorIp: string; compressorIp2: string }> => {
+    const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
+    const compressorIp = `${ip}${Compressor}`;
+    const compressorIp2 = `${ip}${Compressor2}`;
+
+    if (dto.masad) {
+      if (await this.isAddressAvailableForSpivivtz(ip, dto.masad)) {
+        return {
+          ip: ip + dto.masad,
+          compressorIp: compressorIp + dto.masad,
+          compressorIp2: compressorIp2 + dto.masad,
+        };
+      }
+      return null;
     }
+
+    const promises = [];
+
+    for (let i = 1; i <= amountOfDevices; i++) {
+      const promise = new Promise(async (res) => {
+        if (await this.isAddressAvailableForSpivivtz(ip, i)) {
+          res({
+            ip: ip + i,
+            compressorIp: compressorIp + i,
+            compressorIp2: compressorIp2 + i,
+          });
+        } else {
+          res(false);
+        }
+      });
+      promises.push(promise);
+    }
+
+    const addresses = (await Promise.all(promises)).find((el) => el != false);
+
+    if (addresses) {
+      return addresses;
+    }
+
     return null;
-  }
+  };
 
-  const promises = [];
+  private findAvailableAddressForNetz = async (
+    dto: AvailableAddressForDeviceDto,
+  ): Promise<{ IUIP: string; compressorIp: string; compressorIp2: string }> => {
+    const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
+    const compressorIp = `${ip}${Compressor}`;
+    const compressorIp2 = `${ip}${Compressor2}`;
 
-  for (let i = 1; i <= amountOfDevices; i++) {
-    const promise = new Promise(async (res) => {
-      if (
-        await isAddressAvailableForSpivivtz(deviceModel, pingerService, ip, i)
-      ) {
-        res({
-          ip: ip + i,
-          compressorIp: compressorIp + i,
-          compressorIp2: compressorIp2 + i,
-        });
-      } else {
-        res(false);
+    if (dto.masad) {
+      if (await this.isAddressAvailableForSpivivtz(ip, dto.masad)) {
+        return {
+          IUIP: ip + dto.masad,
+          compressorIp: compressorIp + dto.masad,
+          compressorIp2: compressorIp2 + dto.masad,
+        };
       }
-    });
-    promises.push(promise);
-  }
-
-  const addresses = (await Promise.all(promises)).find((el) => el != false);
-
-  if (addresses) {
-    return addresses;
-  }
-
-  return null;
-};
-//#endregion
-
-//#region Netz
-export const findAvailableAddressForNetz = async (
-  dto: AvailableAddressForDeviceDto,
-  amountOfDevices: number,
-  pingerService: PingerHelperService,
-  deviceModel: ModelType<DeviceModel>,
-): Promise<{ IUIP: string; compressorIp: string; compressorIp2: string }> => {
-  const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
-  const compressorIp = `${ip}${Compressor}`;
-  const compressorIp2 = `${ip}${Compressor2}`;
-
-  if (dto.masad) {
-    if (
-      await isAddressAvailableForSpivivtz(
-        deviceModel,
-        pingerService,
-        ip,
-        dto.masad,
-      )
-    ) {
-      return {
-        IUIP: ip + dto.masad,
-        compressorIp: compressorIp + dto.masad,
-        compressorIp2: compressorIp2 + dto.masad,
-      };
     }
-  }
 
-  const promises = [];
+    const promises = [];
 
-  for (let i = 1; i <= amountOfDevices; i++) {
-    const promise = new Promise(async (res) => {
-      if (
-        await isAddressAvailableForSpivivtz(deviceModel, pingerService, ip, i)
-      ) {
-        res({
-          IUIP: ip + i,
-          compressorIp: compressorIp + i,
-          compressorIp2: compressorIp2 + i,
-        });
-      } else {
-        res(false);
-      }
-    });
-    promises.push(promise);
-  }
-
-  const addresses = (await Promise.all(promises)).find((el) => el != false);
-
-  if (addresses) {
-    return addresses;
-  }
-
-  return null;
-};
-//#endregion
-
-//#region Aviv
-export const findAvailableAddressForAviv = async (
-  dto: AvailableAddressForDeviceDto,
-  amountOfDevices: number,
-  pingerService: PingerHelperService,
-  deviceModel: ModelType<DeviceModel>,
-): Promise<{
-  MagicIP: string;
-  compressorIp: string;
-  compressorIp2: string;
-}> => {
-  const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
-  const compressorIp = `${ip}${Compressor}`;
-  const compressorIp2 = `${ip}${Compressor2}`;
-
-  if (dto.masad) {
-    if (
-      await isAddressAvailableForSpivivtz(
-        deviceModel,
-        pingerService,
-        ip,
-        dto.masad,
-      )
-    ) {
-      return {
-        MagicIP: ip + dto.masad,
-        compressorIp: compressorIp + dto.masad,
-        compressorIp2: compressorIp2 + dto.masad,
-      };
+    for (let i = 1; i <= amountOfDevices; i++) {
+      const promise = new Promise(async (res) => {
+        if (await this.isAddressAvailableForSpivivtz(ip, i)) {
+          res({
+            IUIP: ip + i,
+            compressorIp: compressorIp + i,
+            compressorIp2: compressorIp2 + i,
+          });
+        } else {
+          res(false);
+        }
+      });
+      promises.push(promise);
     }
-  }
 
-  const promises = [];
+    const addresses = (await Promise.all(promises)).find((el) => el != false);
 
-  for (let i = 1; i <= amountOfDevices; i++) {
-    const promise = new Promise(async (res) => {
-      if (
-        await isAddressAvailableForSpivivtz(deviceModel, pingerService, ip, i)
-      ) {
-        res({
-          MagicIP: ip + i,
-          compressorIp: compressorIp + i,
-          compressorIp2: compressorIp2 + i,
-        });
-      } else {
-        res(false);
-      }
-    });
-    promises.push(promise);
-  }
-
-  const addresses = (await Promise.all(promises)).find((el) => el != false);
-
-  if (addresses) {
-    return addresses;
-  }
-
-  return null;
-};
-
-//#endregion Aviv
-
-//#region Karnatz
-const isAddressAvailableForKarnatz = async (
-  deviceModel: ModelType<DeviceModel>,
-  pingerService: PingerHelperService,
-  ip: string,
-  masad: number,
-): Promise<boolean> => {
-  const computerIp2 = `${ip}${computerIP2}`;
-  const compressorIp = `${ip}${Compressor}`;
-  const compressorIp2 = `${ip}${Compressor2}`;
-
-  const isDeviceExist = deviceModel.findOne({ ip: ip + masad });
-  const isIpAlive = pingerService
-    .isHostAlive(ip + masad)
-    .then((res) => res.isAlive);
-  const isComputerIp2Alive = pingerService
-    .isHostAlive(computerIp2 + masad)
-    .then((res) => res.isAlive);
-  const isCompressorIpAlive = pingerService
-    .isHostAlive(compressorIp + masad)
-    .then((res) => res.isAlive);
-  const isCompressorIp2Alive = pingerService
-    .isHostAlive(compressorIp2 + masad)
-    .then((res) => res.isAlive);
-
-  return (
-    await Promise.all([
-      isDeviceExist,
-      isIpAlive,
-      isComputerIp2Alive,
-      isCompressorIpAlive,
-      isCompressorIp2Alive,
-    ])
-  ).every((res) => !res);
-};
-
-export const findAvailableAddressForKarnatz = async (
-  dto: AvailableAddressForDeviceDto,
-  amountOfDevices: number,
-  pingerService: PingerHelperService,
-  deviceModel: ModelType<DeviceModel>,
-) => {
-  const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
-  const computerIp2 = `${ip}${computerIP2}`;
-  const compressorIp = `${ip}${Compressor}`;
-  const compressorIp2 = `${ip}${Compressor2}`;
-  if (dto.masad) {
-    if (
-      await isAddressAvailableForKarnatz(
-        deviceModel,
-        pingerService,
-        ip,
-        dto.masad,
-      )
-    ) {
-      return {
-        ip: ip + dto.masad,
-        computerIp2: computerIp2 + dto.masad,
-        compressorIp: compressorIp + dto.masad,
-        compressorIp2: compressorIp2 + dto.masad,
-      };
+    if (addresses) {
+      return addresses;
     }
+
     return null;
-  }
+  };
 
-  const promises = [];
+  private findAvailableAddressForAviv = async (
+    dto: AvailableAddressForDeviceDto,
+  ): Promise<{
+    MagicIP: string;
+    compressorIp: string;
+    compressorIp2: string;
+  }> => {
+    const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
+    const compressorIp = `${ip}${Compressor}`;
+    const compressorIp2 = `${ip}${Compressor2}`;
 
-  for (let i = 1; i <= amountOfDevices; i++) {
-    const promise = new Promise(async (res) => {
-      if (
-        await isAddressAvailableForKarnatz(deviceModel, pingerService, ip, i)
-      ) {
-        res({
-          ip: ip + i,
-          computerIp2: computerIp2 + i,
-          compressorIp: compressorIp + i,
-          compressorIp2: compressorIp2 + i,
-        });
-      } else {
-        res(false);
+    if (dto.masad) {
+      if (await this.isAddressAvailableForSpivivtz(ip, dto.masad)) {
+        return {
+          MagicIP: ip + dto.masad,
+          compressorIp: compressorIp + dto.masad,
+          compressorIp2: compressorIp2 + dto.masad,
+        };
       }
-    });
-    promises.push(promise);
-  }
+    }
 
-  const addresses = (await Promise.all(promises)).find((el) => el != false);
+    const promises = [];
 
-  if (addresses) {
-    return addresses;
-  }
+    for (let i = 1; i <= amountOfDevices; i++) {
+      const promise = new Promise(async (res) => {
+        if (await this.isAddressAvailableForSpivivtz(ip, i)) {
+          res({
+            MagicIP: ip + i,
+            compressorIp: compressorIp + i,
+            compressorIp2: compressorIp2 + i,
+          });
+        } else {
+          res(false);
+        }
+      });
+      promises.push(promise);
+    }
 
-  return null;
-};
-//#endregion
+    const addresses = (await Promise.all(promises)).find((el) => el != false);
+
+    if (addresses) {
+      return addresses;
+    }
+
+    return null;
+  };
+
+  private isAddressAvailableForKarnatz = async (
+    ip: string,
+    masad: number,
+  ): Promise<boolean> => {
+    const computerIp2 = `${ip}${computerIP2}`;
+    const compressorIp = `${ip}${Compressor}`;
+    const compressorIp2 = `${ip}${Compressor2}`;
+
+    const isDeviceExist = this.deviceRepository.getById(ip + masad);
+    const isIpAlive = this.pingerService
+      .isHostAlive(ip + masad)
+      .then((res) => res.isAlive);
+    const isComputerIp2Alive = this.pingerService
+      .isHostAlive(computerIp2 + masad)
+      .then((res) => res.isAlive);
+    const isCompressorIpAlive = this.pingerService
+      .isHostAlive(compressorIp + masad)
+      .then((res) => res.isAlive);
+    const isCompressorIp2Alive = this.pingerService
+      .isHostAlive(compressorIp2 + masad)
+      .then((res) => res.isAlive);
+
+    return (
+      await Promise.all([
+        isDeviceExist,
+        isIpAlive,
+        isComputerIp2Alive,
+        isCompressorIpAlive,
+        isCompressorIp2Alive,
+      ])
+    ).every((res) => !res);
+  };
+
+  private findAvailableAddressForKarnatz = async (
+    dto: AvailableAddressForDeviceDto,
+  ) => {
+    const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
+    const computerIp2 = `${ip}${computerIP2}`;
+    const compressorIp = `${ip}${Compressor}`;
+    const compressorIp2 = `${ip}${Compressor2}`;
+    if (dto.masad) {
+      if (await this.isAddressAvailableForKarnatz(ip, dto.masad)) {
+        return {
+          ip: ip + dto.masad,
+          computerIp2: computerIp2 + dto.masad,
+          compressorIp: compressorIp + dto.masad,
+          compressorIp2: compressorIp2 + dto.masad,
+        };
+      }
+      return null;
+    }
+
+    const promises = [];
+
+    for (let i = 1; i <= amountOfDevices; i++) {
+      const promise = new Promise(async (res) => {
+        if (await this.isAddressAvailableForKarnatz(ip, i)) {
+          res({
+            ip: ip + i,
+            computerIp2: computerIp2 + i,
+            compressorIp: compressorIp + i,
+            compressorIp2: compressorIp2 + i,
+          });
+        } else {
+          res(false);
+        }
+      });
+      promises.push(promise);
+    }
+
+    const addresses = (await Promise.all(promises)).find((el) => el != false);
+
+    if (addresses) {
+      return addresses;
+    }
+
+    return null;
+  };
+
+  private isAddressAvailableForBarkan = async (
+    ip: string,
+    masad: number,
+  ): Promise<boolean> => {
+    const isDeviceExist = this.deviceRepository
+      .getById(ip + masad)
+      .then((res) => res);
+    const isAddressAvailable = this.pingerService
+      .isHostAlive(ip + masad)
+      .then((res) => res.isAlive);
+
+    return (await Promise.all([isDeviceExist, isAddressAvailable])).every(
+      (res) => !res,
+    );
+  };
+
+  private findAvailableAddressForBarkan = async (
+    dto: AvailableAddressForDeviceDto,
+  ): Promise<{ ip: string }> => {
+    const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
+
+    if (dto.masad) {
+      if (await this.isAddressAvailableForBarkan(ip, dto.masad)) {
+        return {
+          ip: ip + dto.masad,
+        };
+      }
+      return null;
+    }
+
+    const promises = [];
+
+    for (let i = 1; i <= amountOfDevices; i++) {
+      const promise = new Promise(async (res) => {
+        if (
+          await isAddressAvailableForBarkan(deviceModel, pingerService, ip, i)
+        ) {
+          res({
+            ip: ip + i,
+          });
+        } else {
+          res(false);
+        }
+      });
+      promises.push(promise);
+    }
+
+    const addresses = (await Promise.all(promises)).find((el) => el != false);
+
+    if (addresses) {
+      return addresses;
+    }
+
+    return null;
+  };
+}
 
 //#region Barkan
-const isAddressAvailableForBarkan = async (
-  deviceModel: ModelType<DeviceModel>,
-  pingerService: PingerHelperService,
-  ip: string,
-  masad: number,
-): Promise<boolean> => {
-  const isDeviceExist = deviceModel
-    .findOne({ ip: ip + masad })
-    .then((res) => res);
-  const isAddressAvailable = pingerService
-    .isHostAlive(ip + masad)
-    .then((res) => res.isAlive);
 
-  return (await Promise.all([isDeviceExist, isAddressAvailable])).every(
-    (res) => !res,
-  );
-};
-
-export const findAvailableAddressForBarkan = async (
-  dto: AvailableAddressForDeviceDto,
-  amountOfDevices: number,
-  pingerService: PingerHelperService,
-  deviceModel: ModelType<DeviceModel>,
-): Promise<{ ip: string }> => {
-  const ip = `${dto.location}.${dto.hamal}.${dto.area}.`;
-
-  if (dto.masad) {
-    if (
-      await isAddressAvailableForBarkan(
-        deviceModel,
-        pingerService,
-        ip,
-        dto.masad,
-      )
-    ) {
-      return {
-        ip: ip + dto.masad,
-      };
-    }
-    return null;
-  }
-
-  const promises = [];
-
-  for (let i = 1; i <= amountOfDevices; i++) {
-    const promise = new Promise(async (res) => {
-      if (
-        await isAddressAvailableForBarkan(deviceModel, pingerService, ip, i)
-      ) {
-        res({
-          ip: ip + i,
-        });
-      } else {
-        res(false);
-      }
-    });
-    promises.push(promise);
-  }
-
-  const addresses = (await Promise.all(promises)).find((el) => el != false);
-
-  if (addresses) {
-    return addresses;
-  }
-
-  return null;
-};
 //#endregion
 
 //#region Radar
