@@ -31,7 +31,15 @@ export const FindAvailAddressForm = forwardRef<FindAvailAddressFormRef, FindAvai
       formState: { errors },
       watch,
       reset,
-    } = useForm<IFindAvailableAddressData>();
+    } = useForm<IFindAvailableAddressData>({
+      defaultValues: {
+        area: undefined,
+        deviceType: DeviceTypeEnum.Aviv,
+        hamal: parseInt(Object.keys(hamalsConstant)[0]),
+        location: LocationEnum.hamal,
+        masad: undefined,
+      },
+    });
 
     const location = watch('location');
     const hamal = watch('hamal');
@@ -55,7 +63,7 @@ export const FindAvailAddressForm = forwardRef<FindAvailAddressFormRef, FindAvai
               error={!!errors.location}
               select
               id='place'
-              value={location ?? LocationEnum.hamal}
+              value={location}
               fullWidth
               label='מקום'
             >
@@ -69,7 +77,7 @@ export const FindAvailAddressForm = forwardRef<FindAvailAddressFormRef, FindAvai
                 required: { value: true, message: 'צריך לבחור מקום' },
                 valueAsNumber: true,
               })}
-              value={hamal ?? parseInt(Object.keys(hamalsConstant)[0])}
+              value={hamal}
               error={!!errors.location}
               select
               id='hamal'
@@ -100,12 +108,11 @@ export const FindAvailAddressForm = forwardRef<FindAvailAddressFormRef, FindAvai
             <TextField
               {...register('deviceType', {
                 required: { value: true, message: 'צריך למלא שדה של אמצעי' },
-                valueAsNumber: true,
               })}
               select
-              value={device || 'Aviv'}
+              value={device}
               error={!!errors.deviceType}
-              id='אמצעי'
+              id='device'
               fullWidth
               label='אמצעי'
             >

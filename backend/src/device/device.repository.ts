@@ -2,10 +2,14 @@ import { Injectable } from '@nestjs/common';
 import { ModelType } from '@typegoose/typegoose/lib/types';
 import { DeviceModel } from './device.model';
 import { IDevice } from './types/interfaces/device.interface';
+import { InjectModel } from 'nestjs-typegoose';
 
 @Injectable()
 export class DeviceRepository {
-  constructor(private readonly deviceModel: ModelType<DeviceModel>) {}
+  constructor(
+    @InjectModel(DeviceModel)
+    private readonly deviceModel: ModelType<DeviceModel>,
+  ) {}
 
   create(device: IDevice) {
     return this.deviceModel.create(device);

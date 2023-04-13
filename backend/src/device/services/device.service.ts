@@ -36,13 +36,11 @@ import { SecControllerFactory } from '../factories/components/sec-controller.fac
 import { DeviceRepository } from '../device.repository';
 import { IDevice } from '../types/interfaces/device.interface';
 
-const amountOfDevices: number = 9;
 
 @Injectable()
 export class DeviceService {
   constructor(
     private readonly deviceRepository: DeviceRepository,
-    private readonly pingerHelperService: PingerHelperService,
     private readonly checkAddressAvailabilityHelperService: CheckAddressAvailabilityHelperService,
     private readonly findAvailAddressForDeviceHelperService: FindAvailAddressForDeviceHelperService,
   ) {}

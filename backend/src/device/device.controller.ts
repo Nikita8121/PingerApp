@@ -46,7 +46,7 @@ export class DeviceController {
 
   @Get()
   async getDevices() {
-    return this.devicesService.getDevices();
+    return this.devicesService.getDevicesWithHamal();
   }
 
   @Get('excel')

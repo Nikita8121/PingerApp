@@ -24,8 +24,8 @@ import { FindAvailAddressForDeviceHelperService } from './services/helpers/find-
   ],
   providers: [
     DeviceService,
-    CheckAddressAvailabilityHelperService,
     DeviceRepository,
+    CheckAddressAvailabilityHelperService,
     FindAvailAddressForDeviceHelperService,
   ],
   controllers: [DeviceController],
