@@ -157,7 +157,7 @@ export const FindAvailAddressForm = forwardRef<FindAvailAddressFormRef, FindAvai
         <Divider className={styles.divider} />
         <Box className={styles.actions}>
           <Button type='submit' variant='contained'>
-            לשלוח פינגים
+            למצוא כתובת לאמצעי
           </Button>
         </Box>
       </form>

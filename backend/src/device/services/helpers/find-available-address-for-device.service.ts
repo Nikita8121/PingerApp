@@ -213,7 +213,7 @@ export class FindAvailAddressForDeviceHelperService {
     const compressorIp = `${ip}${Compressor}`;
     const compressorIp2 = `${ip}${Compressor2}`;
 
-    const isDeviceExist = this.deviceRepository.getById(ip + masad);
+    const isDeviceExist = this.deviceRepository.findByIp(ip + masad);
     const isIpAlive = this.pingerService
       .isHostAlive(ip + masad)
       .then((res) => res.isAlive);
@@ -289,7 +289,7 @@ export class FindAvailAddressForDeviceHelperService {
     masad: number,
   ): Promise<boolean> => {
     const isDeviceExist = this.deviceRepository
-      .getById(ip + masad)
+      .findByIp(ip + masad)
       .then((res) => res);
     const isAddressAvailable = this.pingerService
       .isHostAlive(ip + masad)
@@ -343,7 +343,7 @@ export class FindAvailAddressForDeviceHelperService {
     masad: number,
   ): Promise<boolean> => {
     const isDeviceExists = this.deviceRepository
-      .getById(ip + masad)
+      .findByIp(ip + masad)
       .then((res) => res);
     const isAddressAvailable = this.pingerService
       .isHostAlive(ip + RadarIP + masad)
@@ -395,7 +395,7 @@ export class FindAvailAddressForDeviceHelperService {
     ip: string,
     masad: number,
   ): Promise<boolean> => {
-    const isDeviceExists = this.deviceRepository.getById(ip + masad);
+    const isDeviceExists = this.deviceRepository.findByIp(ip + masad);
     const isAddressAvailable = this.pingerService
       .isHostAlive(ip + Port + masad)
       .then((res) => res.isAlive);

@@ -20,11 +20,13 @@ export class DeviceRepository {
   }
 
   async deleteMany(idArr: string[]) {
-    return this.deviceModel.deleteMany({
-      _id: {
-        $in: idArr,
-      },
-    });
+    return this.deviceModel
+      .deleteMany({
+        _id: {
+          $in: idArr,
+        },
+      })
+      .exec();
   }
 
   async getById(id: string) {

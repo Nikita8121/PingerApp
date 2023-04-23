@@ -9,8 +9,6 @@ import {
 import { DeviceCreateDto } from './dto/device-create.dto';
 import { DeviceService } from './services/device.service';
 
-import { DeviceDeleteDto } from './dto/device.delete.dto';
-
 import { AvailableAddressForDeviceDto } from './dto/device-available.dto';
 import { ApiBadRequestResponse } from '@nestjs/swagger';
 
@@ -24,14 +22,9 @@ export class DeviceController {
     return this.devicesService.addDevice(deviceCreateDto);
   }
 
-  @Post('delete')
-  async deleteDevice(@Body() deviceDeleteDto: DeviceDeleteDto) {
-    return this.devicesService.deleteDevice(deviceDeleteDto);
-  }
-
   @Post('deleteMany')
-  async deleteDevices(@Body() devicesDeleteDto: DeviceDeleteDto[]) {
-    return this.devicesService.deleteDevices(devicesDeleteDto);
+  async deleteDevices(@Body() devicesIDs: string[]) {
+    return this.devicesService.deleteDevices(devicesIDs);
   }
 
   @ApiBadRequestResponse({ description: `all ip's taken on area` })

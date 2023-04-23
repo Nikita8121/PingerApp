@@ -1,9 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { DeviceCreateDto } from '../dto/device-create.dto';
-import { PingerHelperService } from 'src/utils/pingerHelper/pingerHelper.service';
 import { AvailableAddressForDeviceDto } from '../dto/device-available.dto';
 
-import { DeviceDeleteDto } from '../dto/device.delete.dto';
 import { FindAvailAddressForDeviceHelperService } from './helpers/find-available-address-for-device.service';
 import { AvailableAddressDto } from '../dto/device-available-address-results.dto';
 import { Interval } from '@nestjs/schedule';
@@ -62,22 +60,9 @@ export class DeviceService {
     return this.deviceRepository.create(deviceEntity);
   }
 
-  /**
-   * removes a selected device from the database
-   * @param deviceDeleteDto value of an id
-   * @returns the id of the deleted device
-   */
-  async deleteDevice(deviceDeleteDto: DeviceDeleteDto) {
-    const device = await this.deviceRepository.getById(deviceDeleteDto.id);
-    if (device) {
-      return this.deviceRepository.delete(deviceDeleteDto.id);
-    }
-    return undefined;
-  }
-
-  async deleteDevices(devicesDeleteDto: DeviceDeleteDto[]) {
+  async deleteDevices(devicesDeleteDto: string[]) {
     return this.deviceRepository.deleteMany(
-      devicesDeleteDto.map((el) => el.id),
+      devicesDeleteDto,
     );
   }
 

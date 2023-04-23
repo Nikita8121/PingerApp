@@ -15,6 +15,7 @@ import { DevicesFilterProps } from './DevicesFilter.props';
 import { useState } from 'react';
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
+import { hamalsConstant } from '@/shared/constants/index.constants';
 
 export const DevicesFilter = ({ setFilter }: DevicesFilterProps) => {
   const [isFilterOpen, setIsFilterOpen] = useState<boolean>(false);
@@ -104,7 +105,7 @@ export const DevicesFilter = ({ setFilter }: DevicesFilterProps) => {
                 fullWidth
                 label=''
               >
-                <MenuItem value={''}>אף אחד</MenuItem>
+                <MenuItem value={0}>אף אחד</MenuItem>
                 <MenuItem value={93}>חמ"ל</MenuItem>
                 <MenuItem value={94}>אתר</MenuItem>
               </Select>
@@ -112,15 +113,19 @@ export const DevicesFilter = ({ setFilter }: DevicesFilterProps) => {
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
-              type='number'
-              inputProps={{ inputMode: 'numeric', pattern: '[0-9]*' }}
+              onChange={({ target }) => setFilter('hamal', +target.value)}
+              select
+              id='hamal'
               fullWidth
-              onChange={({ target }) => setFilter('hamal', target.value)}
-              id='firstArea'
-              label='מספר חמ"ל'
-              variant='outlined'
-              helperText='צריך להכניס מיקום'
-            />
+              label='שם חמ"ל'
+            >
+              <MenuItem value={0}>אף אחד</MenuItem>
+              {Object.keys(hamalsConstant).map((code) => (
+                <MenuItem key={code} value={parseInt(code)}>
+                  {hamalsConstant[parseInt(code)].name}
+                </MenuItem>
+              ))}
+            </TextField>
           </Grid>
           <Grid item xs={12} md={6}>
             <TextField
